@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getEnv } from "@/lib/env";
 
 export async function signIn(formData: FormData): Promise<void> {
   const email = String(formData.get("email") ?? "").trim();
@@ -20,9 +21,16 @@ export async function signIn(formData: FormData): Promise<void> {
 export async function signUp(formData: FormData): Promise<void> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "").trim();
+  const { appUrl } = getEnv();
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({ email, password });
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: `${appUrl}/auth/callback`
+    }
+  });
 
   if (error) {
     redirect(`/signup?error=${encodeURIComponent(error.message)}`);

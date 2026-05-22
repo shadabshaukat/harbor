@@ -3,14 +3,14 @@ import { signUp } from "@/app/actions/auth";
 
 export default function SignupPage({ searchParams }: { searchParams: { error?: string } }) {
   return (
-    <main className="container">
+    <main className="container auth-wrap">
       <h1>Create account</h1>
-      {searchParams?.error ? <p style={{ color: "#b42318" }}>{searchParams.error}</p> : null}
-      <form action={signUp} className="card" style={{ maxWidth: 460 }}>
-        <label>Email</label>
-        <input name="email" type="email" required style={{ width: "100%", marginBottom: 12 }} />
-        <label>Password</label>
-        <input name="password" type="password" required style={{ width: "100%", marginBottom: 16 }} />
+      {searchParams?.error ? <p className="error">{searchParams.error}</p> : null}
+      <form action={signUp} className="card form">
+        <label className="label">Email</label>
+        <input className="input" name="email" type="email" required />
+        <label className="label">Password</label>
+        <input className="input" name="password" type="password" required />
         <button className="btn" type="submit">Sign up</button>
       </form>
       <p className="subtle" style={{ marginTop: 16 }}>

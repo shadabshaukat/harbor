@@ -13,6 +13,21 @@ Containerized multi-tenant SaaS starter for hospitality operators (cafes, restau
 - Vercel deployment target
 - Docker container runtime
 
+## Runtime Mode Toggle (Local vs Vercel)
+Use `APP_RUNTIME_TARGET` in env:
+- `local`: app URL resolves from `LOCAL_APP_URL` (default `http://localhost:3000`)
+- `vercel`: app URL resolves from `NEXT_PUBLIC_APP_URL` (or Vercel-provided URL vars)
+- `auto`: prefers `NEXT_PUBLIC_APP_URL`, then `VERCEL_URL`, else localhost
+
+Recommended:
+- Local dev `.env.local`
+  - `APP_RUNTIME_TARGET=local`
+  - `LOCAL_APP_URL=http://localhost:3000`
+  - `NEXT_PUBLIC_APP_URL=http://localhost:3000`
+- Vercel env vars
+  - `APP_RUNTIME_TARGET=vercel`
+  - `NEXT_PUBLIC_APP_URL=https://harbor-six-xi.vercel.app`
+
 ## Quick Start
 1. Copy env file:
 ```bash
@@ -44,6 +59,7 @@ docker compose up --build
 ## Auth + Tenant Gating
 - `/login` and `/signup` implemented with Supabase Auth.
 - `middleware.ts` protects `/dashboard` for authenticated users.
+- `/auth/callback` handles Supabase email confirmation/callback links.
 - RLS enforces tenant boundaries in Postgres.
 
 ## APIs
@@ -56,8 +72,10 @@ docker compose up --build
 ## Vercel Deployment
 1. Import repository into Vercel.
 2. Add environment variables from `.env.example`.
-3. Set region preference to EU (`fra1`) for EU-first workloads in `vercel.json`.
-4. Deploy.
+3. Set `APP_RUNTIME_TARGET=vercel`.
+4. Set `NEXT_PUBLIC_APP_URL` to your Vercel domain.
+5. Set region preference to EU (`fra1`) for EU-first workloads in `vercel.json`.
+6. Deploy.
 
 ## Key Architecture Notes
 See `docs/architecture.md` for:
