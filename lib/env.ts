@@ -43,6 +43,24 @@ function getAppUrl(): string {
     );
   }
 
+  if (process.env.VERCEL || process.env.VERCEL_URL || process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    if (process.env.NEXT_PUBLIC_APP_URL) {
+      return normalizeUrl(process.env.NEXT_PUBLIC_APP_URL);
+    }
+
+    if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+      return normalizeUrl(`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`);
+    }
+
+    if (process.env.VERCEL_URL) {
+      return normalizeUrl(`https://${process.env.VERCEL_URL}`);
+    }
+  }
+
+  if (process.env.LOCAL_APP_URL) {
+    return normalizeUrl(process.env.LOCAL_APP_URL);
+  }
+
   if (process.env.NEXT_PUBLIC_APP_URL) {
     return normalizeUrl(process.env.NEXT_PUBLIC_APP_URL);
   }
@@ -66,6 +84,7 @@ export function getEnv() {
   return {
     supabaseUrl: required("NEXT_PUBLIC_SUPABASE_URL"),
     supabaseAnonKey: supabasePublicKey,
-    appUrl: getAppUrl()
+    appUrl: getAppUrl(),
+    menuImagesBucket: process.env.SUPABASE_MENU_IMAGES_BUCKET?.trim() || "menu-images"
   };
 }

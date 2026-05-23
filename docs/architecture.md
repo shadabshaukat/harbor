@@ -1,4 +1,4 @@
-# HarborLedger Architecture Notes (Supabase + Vercel)
+# Harbor Architecture Notes (Supabase + Vercel)
 
 ## 1) Fit for Acme's Goals
 - App stack: Next.js on Vercel + Supabase (Postgres, Auth, Storage, Realtime, Edge Functions).

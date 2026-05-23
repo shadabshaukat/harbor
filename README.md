@@ -1,11 +1,13 @@
-# HarborLedger (Next.js + Supabase + Vercel)
+# Harbor (Next.js + Supabase + Vercel)
 
 Containerized multi-tenant SaaS starter for hospitality operators (cafes, restaurants, bars, pubs, hotels):
 - POS + checkout workflows
 - Inventory and supplier operations
 - Menus and pricing
 - End-of-day close ledger
-- Multi-store, multi-tenant operations
+- Multi-store, multi-workspace operations with database-enforced tenant isolation
+
+See [docs/specs.md](docs/specs.md) for the full product, workflow, schema, storage, and deployment specification.
 
 ## Stack
 - Next.js 14 (App Router)
@@ -51,22 +53,45 @@ docker compose up --build
 
 ## Supabase Setup
 1. Create a Supabase project.
-2. Run SQL from `supabase/schema.sql` in SQL editor.
-3. Run SQL from `supabase/seed.sql`.
-4. Add keys to `.env.local`.
-5. Create a real Auth user from `/signup` and link it in `users_profile` using the SQL snippet in `seed.sql`.
+2. Add keys to `.env.local`.
+3. Run SQL from `supabase/build_schema.sql` in the Supabase SQL editor.
+4. To redeploy from a clean slate, run `supabase/drop_schema.sql`, then run `supabase/build_schema.sql`.
+5. Create a real owner account from `/signup`; the guided onboarding flow creates the workspace tenant, owner profile, first store, tables, starter menu, and inventory.
 
-## Auth + Tenant Gating
-- `/login` and `/signup` implemented with Supabase Auth.
+## Auth + Workspace Gating
+- `/signup` supports business registration and employee invite account creation.
+- `/login` supports owner and employee workspace login.
+- `/login` includes a resend verification email form for pending signup confirmations.
 - `middleware.ts` protects `/dashboard` for authenticated users.
 - `/auth/callback` handles Supabase email confirmation/callback links.
 - RLS enforces tenant boundaries in Postgres.
 
+## Supabase Auth Email Setup
+- Add `http://localhost:3000/**` and your Vercel app URL to Supabase Auth redirect URLs.
+- For production or external testers, configure custom SMTP in Supabase Auth. Supabase's built-in sender is only suitable for limited testing.
+- If local auth emails should return to local dev, use `APP_RUNTIME_TARGET=local` or leave `APP_RUNTIME_TARGET=auto` with `LOCAL_APP_URL=http://localhost:3000`.
+- Harbor always uses Supabase Auth APIs for signup, verification resend, and callback exchange; it does not send auth emails directly.
+
+## Live Debugger
+- A floating Debug button is enabled by default in local development.
+- Set `NEXT_PUBLIC_HARBOR_DEBUG=false` and `HARBOR_DEBUG=false` to hide/disable it.
+- Remote production streaming is blocked unless `HARBOR_DEBUG_ALLOW_REMOTE=true`.
+- The debugger streams client route/API activity plus server-side auth/API events in real time.
+
+## Private Storage
+- Menu item photos use a private Supabase Storage bucket.
+- Bucket name is configured by `SUPABASE_MENU_IMAGES_BUCKET`.
+- Uploads are tenant-scoped by object path and rendered with signed URLs for authenticated dashboard users.
+
 ## APIs
 - `POST /api/pos/orders`
-  - body: `{ "store_id": "<uuid>", "total_cents": 2250 }`
+  - body: `{ "store_id": "<uuid>", "table_id": "<uuid-or-null>", "channel": "dine_in", "note": "extra hot", "items": [{ "menu_item_id": "<uuid>", "qty": 2 }] }`
 - `POST /api/eod/close`
-  - body: `{ "store_id": "<uuid>", "gross_sales_cents": 100000, "cash_variance_cents": -200 }`
+  - body: `{ "store_id": "<uuid>", "gross_sales_cents": 100000, "cash_counted_cents": 99800 }`
+- `POST /api/staff/invite`
+  - body: `{ "invited_email": "team@example.com", "role": "staff", "store_id": "<uuid-or-null>", "expires_days": 7 }`
+- `POST /api/menu-items/[id]/image`
+  - body: `multipart/form-data` with `file`
 - `GET /api/health`
 
 ## Vercel Deployment

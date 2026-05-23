@@ -1,16 +1,37 @@
 import "./globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { DebugConsole } from "@/app/_components/debug-console";
+import { isDebugEnabled } from "@/lib/debug/config";
 
 export const metadata: Metadata = {
-  title: "HarborLedger | Hospitality System of Record + POS",
+  title: "Harbor | Hospitality POS",
   description:
-    "Multi-tenant SaaS for cafes, restaurants, bars, pubs, and hotels: POS, inventory, menus, payments, and end-of-day close."
+    "Harbor helps cafes, bars, pubs, and restaurants run orders, team access, inventory, and close-of-day workflows from one platform.",
+  applicationName: "Harbor",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Harbor"
+  }
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#0a684f"
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const showDebug = isDebugEnabled();
+
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        {showDebug ? <DebugConsole /> : null}
+      </body>
     </html>
   );
 }
